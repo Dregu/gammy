@@ -12,6 +12,7 @@
 #include <QtDBus/QDBusInterface>
 #include <QtDBus/QDBusConnection>
 #include <QShortcut>
+#include <QDesktopWidget>
 #include "cfg.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -45,6 +46,7 @@ void MainWindow::init()
 	QIcon icon = QIcon(":res/icons/gammy.ico");
 	createTrayIcon(icon);
 	setWindowProperties(icon);
+	setWindowFlags(Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint | Qt::Popup);
 
 	connect(QApplication::instance(), &QApplication::aboutToQuit, this, &MainWindow::shutdown);
 }
@@ -80,7 +82,7 @@ void MainWindow::setWindowProperties(QIcon &icon)
 	ui->advBrSettingsBtn->setDisabled(true);
 	ui->advBrSettingsBtn->setVisible(false);
 
-	int x = cfg["wnd_x"].get<int>();
+	/*int x = cfg["wnd_x"].get<int>();
 	int y = cfg["wnd_y"].get<int>();
 
 	if (x == -1 && y == -1) {
@@ -94,7 +96,7 @@ void MainWindow::setWindowProperties(QIcon &icon)
 			show();
 			tray_wnd_toggle->setText(hide_txt);
 		}
-	}
+	}*/
 }
 
 void MainWindow::setPos()
@@ -249,6 +251,13 @@ QMenu* MainWindow::createTrayMenu()
 
 	connect(tray_wnd_toggle, &QAction::triggered, this, [&] {
 		if (isHidden()) {
+			QRect rec = QApplication::desktop()->availableGeometry();
+			auto pos = QCursor::pos();
+			int y = rec.height()-size().height();
+			int x = pos.x()-size().width()/2;
+			pos.setX(x);
+			pos.setY(y);
+			move(pos);
 			show();
 			tray_wnd_toggle->setText(hide_txt);
 		} else {
